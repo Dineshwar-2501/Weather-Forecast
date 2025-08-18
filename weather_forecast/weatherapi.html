@@ -1,0 +1,170 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather Fetcher</title>
+  <style>
+    :root { --radius: 16px; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: #0f172a; color: #e5e7eb; margin: 0; }
+    .wrap { max-width: 680px; margin: 48px auto; padding: 0 16px; }
+    .card { background: #111827; border: 1px solid #1f2937; border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,.3); padding: 20px; }
+    h1 { margin: 0 0 12px; font-size: 24px; letter-spacing: .3px; }
+    p.sub { margin: 0 0 18px; color: #9ca3af; font-size: 13px; }
+    .row { display: flex; gap: 10px; }
+    input[type="text"] { flex: 1; padding: 12px 14px; border-radius: 12px; border: 1px solid #374151; background: #0b1220; color: #e5e7eb; outline: none; }
+    input::placeholder { color: #6b7280; }
+    button { padding: 12px 16px; border-radius: 12px; border: 1px solid #374151; background: #1f2937; color: #e5e7eb; cursor: pointer; font-weight: 600; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .result { margin-top: 16px; display: none; }
+    .result.active { display: block; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 10px; }
+    .tile { background: #0b1220; border: 1px solid #1f2937; border-radius: 14px; padding: 14px; }
+    .cityline { display: flex; align-items: center; gap: 10px; }
+    .cityline img { width: 60px; height: 60px; }
+    .muted { color: #9ca3af; font-size: 12px; }
+    .error { display: none; margin-top: 12px; color: #fecaca; background: #450a0a; border: 1px solid #7f1d1d; padding: 10px; border-radius: 12px; }
+    .error.active { display: block; }
+    .loading { display: none; margin-top: 12px; }
+    .loading.active { display: inline-block; }
+    .footer { margin-top: 16px; font-size: 12px; color: #9ca3af; }
+    a { color: #93c5fd; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>🌤️ Weather Fetcher</h1>
+      <p class="sub">Type a city, get current temperature, humidity, and conditions. Powered by OpenWeatherMap.</p>
+      <div class="row">
+        <input id="city" type="text" placeholder="e.g., Chennai" autocomplete="off" />
+        <button id="go">Fetch</button>
+      </div>
+      <span id="loading" class="loading">Fetching…</span>
+      <div id="error" class="error"></div>
+
+      <div id="result" class="result">
+        <div class="cityline">
+          <img id="icon" alt="" />
+          <div>
+            <div id="name" style="font-weight:700; font-size:18px"></div>
+            <div id="desc" class="muted"></div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="tile">
+            <div class="muted">Temperature</div>
+            <div id="temp" style="font-size:20px; font-weight:700"></div>
+          </div>
+          <div class="tile">
+            <div class="muted">Humidity</div>
+            <div id="humidity" style="font-size:20px; font-weight:700"></div>
+          </div>
+          <div class="tile">
+            <div class="muted">Condition</div>
+            <div id="cond" style="font-size:20px; font-weight:700"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">Hint: Press <kbd>Enter</kbd> to search. Uses metric units (°C). Data from <a href="https://openweathermap.org/" target="_blank" rel="noopener">OpenWeatherMap</a>.</div>
+    </div>
+  </div>
+
+  <script>
+    // 🔑 Put your OpenWeatherMap API key here
+    const API_KEY = "6c61152a7dec089f1041b74769b10d3d";
+
+    const $ = (sel) => document.querySelector(sel);
+    const cityInput = $("#city");
+    const goBtn = $("#go");
+    const loading = $("#loading");
+    const errorBox = $("#error");
+    const result = $("#result");
+
+    const nameEl = $("#name");
+    const descEl = $("#desc");
+    const tempEl = $("#temp");
+    const humidityEl = $("#humidity");
+    const condEl = $("#cond");
+    const iconEl = $("#icon");
+
+    function setLoading(isLoading) {
+      loading.classList.toggle("active", isLoading);
+      goBtn.disabled = isLoading;
+    }
+
+    function setError(msg) {
+      errorBox.textContent = msg || "";
+      errorBox.classList.toggle("active", !!msg);
+    } 
+
+    function showResult(data) {
+			console.log(data);
+      const { name, sys, main, weather } = data;
+      const w = weather && weather[0] ? weather[0] : { description: "", icon: "" };
+      nameEl.textContent = `${name}, ${sys?.country ?? ""}`.trim();
+      descEl.textContent = w.description ? w.description[0].toUpperCase() + w.description.slice(1) : "";
+      tempEl.textContent = `${Math.round(main.temp)} °C`;
+      humidityEl.textContent = `${main.humidity} %`;
+      condEl.textContent = w.main || "—";
+      iconEl.src = w.icon ? `https://openweathermap.org/img/wn/${w.icon}@2x.png` : "";
+      iconEl.alt = w.description || "weather icon";
+      result.classList.add("active");
+    }
+
+    async function fetchWeather(city) {
+      if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE") {
+        setError("Add your OpenWeatherMap API key in the code first.");
+        return;
+      }
+      if (!city) {
+        setError("Type a city name.");
+        return;
+      }
+      setError("");
+      setLoading(true);
+      try {
+        const url = new URL("https://api.openweathermap.org/data/2.5/weather");
+        url.searchParams.set("q", city);
+        url.searchParams.set("appid", API_KEY);
+        url.searchParams.set("units", "metric");
+
+        const res = await fetch(url);
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 404) throw new Error(data.message || "City not found");
+          throw new Error(data.message || `Request failed: ${res.status}`);
+        }
+        const data = await res.json();
+        showResult(data);
+        localStorage.setItem("last_city", city);
+      } catch (err) {
+        setError(err.message || "Something went wrong.");
+        result.classList.remove("active");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    goBtn.addEventListener("click", () => fetchWeather(cityInput.value.trim()));
+    cityInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") fetchWeather(cityInput.value.trim());
+    });
+
+    // restore last searched city
+    const last = localStorage.getItem("last_city");
+    if (last) {
+      cityInput.value = last;
+      fetchWeather(last);
+    } else {
+      // nice defaults for first try
+      cityInput.value = "Chennai";
+    }
+  </script>
+</body>
+</html>
