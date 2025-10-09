@@ -8,21 +8,67 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
 
- <style>
-  body{
-    background-image: url(../WeatherImage.jpg);
-    background-size: cover;
-    background-repeat: no-repeat;
-  }
- </style>   
+  <style>
+    body {
+      background-image: url(../WeatherImage.jpg);
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+    .text-shadow {
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    /* wavy.css */
+    .wavy-bg {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, #0b0b22, #000);
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .wavy-bg::before {
+      content: "";
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      top: -50%;
+      left: -50%;
+      background: repeating-linear-gradient(0deg,
+          rgba(0, 100, 255, 0.3) 0px,
+          rgba(0, 100, 255, 0.3) 1px,
+          transparent 1px,
+          transparent 20px);
+      transform: rotate(45deg);
+      animation: wave 6s linear infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes wave {
+      from {
+        transform: translateY(0) rotate(45deg);
+      }
+
+      to {
+        transform: translateY(-20px) rotate(45deg);
+      }
+    }
+  </style>
 </head>
 
-<body>
+<body class="overflow-hidden">
 
   <!-- 🔹 Custom styled dropdown -->
-  <div class="ms-3 rounded-pill position-absolute top-0 end-0 " id="custom_translate_dropdown">
-    <a href="#" class="dropdown-toggle text-dark px-3 py-2 d-block " data-bs-toggle="dropdown">
-      <small><i class="fas fa-globe-europe text-light me-2"></i> English</small>
+  <div class="ms-1 rounded-pill position-absolute top-0 end-0 " id="custom_translate_dropdown">
+    <a href="#" class="dropdown-toggle text-dark px-3 py-2 d-block shadow-lg p-3 mb-1 bg-white rounded " data-bs-toggle="dropdown">
+      <small ><i class="fas fa-globe-europe text-light me-2 "></i> English</small>
     </a>
 
     <div class="dropdown-menu rounded">
@@ -39,36 +85,36 @@
   <div id="google_translate_element" style="display:none;"></div>
 
 
-  <div class="container w-100 d-flex place-content-center py-5 px-3 my-5 mx-auto "> 
+  <div class="container w-100 d-flex place-content-center py-5 px-3 my-1 mx-auto ">
     <div class="row">
-      <h1 class="text-center text-white">🌤️ Weather Fetcher</h1>
-      <div class="d-flex  flex-column justify-content-center  mt-5">
-        <input type="text" class="col-12  rounded-2 border-0 w-fit mx-auto  mb-2 text-left mx-lg-2 p-2 enter" id="city"
+      <h1 class="text-center text-white text-shadow">🌤️ Weather Fetcher</h1>
+      <div class="d-flex  flex-column justify-content-center  mt-2">
+        <input type="text" class="col-12  rounded-2 border-0 w-fit mx-auto  text-left mx-lg-2  enter shadow-lg p-2  bg-white rounded-4xl" id="city"
           placeholder="City Name...">
-        <ul class="suggest list-group" id="suggestion"></ul>
-        <button type="submit" id="sun" class="col-3 w-auto sm:w-50 mx-auto  btn btn-primary fw-bold submit mb-2"
+        <ul class="suggest list-group ms-2 w-fit " id="suggestion"></ul>
+        <button type="submit" id="sun" class="col-3 w-auto sm:w-50 mx-auto  mt-2  btn btn-primary fw-bold submit my-1"
           onclick="weather()">Submit</button>
       </div>
-      <div class="d-flex  mx-auto   w-auto m-3 rounded-4">
-        <div><img alt="" id="icon" class="w-75 mt-3"></div>
-        <div class="mt-4  p-2">
-          <div class="country  text-gray fw-bold" id="location"></div>
-          <div id="status" class="text-gray"></div>
+      <div class="d-flex  mx-auto glass-effect opacity-100 w-auto m-1 rounded ">
+        <div><img alt="" id="icon" class="w-75 m-1"></div>
+        <div class="mt-1  p-2">
+          <div class="country  text-shadow-gray-300 fw-bold text-white" id="location"></div>
+          <div id="status" class="text-shadow-white fw-bold text-white"></div>
         </div>
       </div>
 
-      <div class="row justify-content-center opacity-100  d-flex    rounded-3">
+      <div class="row justify-content-center ms-1 align-item-center opacity-100  d-flex  w-full  rounded-3xl">
 
-        <div class=" col-12 col-lg-3  text-center temperature bg-info p-2 m-2">
-          <div class="text text-gray fw-bold">Temperaure</div>
+        <div class=" col-12 col-lg-3  text-center shadow-lg glass-effect rounded    temperature  p-2 mx-auto my-2">
+          <div class="text text-white text-shadow-white fw-bold">Temperaure</div>
           <div class="text1 fw-bold fs-2 text-white" id="tem"> </div>
         </div>
-        <div class=" col-12 col-lg-3 humidity text-center bg-info  p-2 m-2">
-          <div class="text  text-gray fw-bold">Humidity</div>
+        <div class=" col-12 col-lg-3 humidity text-center shadow-lg glass-effect  rounded     p-2 mx-auto my-2">
+          <div class="text  text-white text-shadow-white  fw-bold">Humidity</div>
           <div class="text1 fw-bold fs-2 text-white" id="hum"> </div>
         </div>
-        <div class=" col-12 col-lg-3 condition text-center bg-info p-2 m-2">
-          <div class="text text-gray fw-bold">Condition</div>
+        <div class=" col-12 col-lg-3 condition  shadow-lg glass-effect rounded  text-center  p-2 mx-auto my-2">
+          <div class="text text-white text-shadow-white  fw-bold">Condition</div>
           <div class="text1 fw-bold fs-2 text-white" id="con"> </div>
         </div>
       </div>
@@ -116,6 +162,24 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
   integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
 <script>
+  const weatherBackgrounds = {
+    Clear: "sunny-bg.jpg",
+    Clouds: "cloudy-bg.jpg",
+    Rain: "rainy-bg.jpg",
+    Drizzle: "drizzle-bg.jpg",
+    Thunderstorm: "storm-bg.jpg",
+    Snow: "snow-bg.jpg",
+    Mist: "mist-bg.jpg",
+    Smoke: "smoke-bg.jpg",
+    Haze: "haze-bg.jpg",
+    Fog: "fog-bg.jpg",
+    Dust: "dust-bg.jpg",
+    Sand: "sand-bg.jpg",
+    Ash: "ash-bg.jpg",
+    Squall: "windy-bg.jpg",
+    Tornado: "tornado-bg.jpg",
+  };
+
   let temp = document.querySelector('#tem');
   let humd = document.querySelector('#hum');
   let cond = document.querySelector('#con');
@@ -147,6 +211,9 @@
     temp.textContent = (data.main.temp - 273.15).toFixed(1) + "°C";
     humd.textContent = data.main.humidity + "%";
     cond.textContent = data.weather[0].main;
+    document.body.style.background = `url(${weatherBackgrounds[data.weather[0].main] ?? ""})`;
+    document.body.style.backgroundRepeat = "no-repeat";
+    document.body.style.backgroundSize = "cover";
   }
 
 
@@ -165,14 +232,14 @@
 </script>
 
 <script type="module">
-    let cities = [];
+  let cities = [];
 
-// Load the JSON file
-fetch("./world_cities.json")
-  .then(res => res.json())
-  .then(data => {
-    cities = data;
-  });
+  // Load the JSON file
+  fetch("./world_cities.json")
+    .then(res => res.json())
+    .then(data => {
+      cities = data;
+    });
   const inputKey = document.getElementById("city");
   const list = document.querySelector('#suggestion');
 
@@ -185,10 +252,10 @@ fetch("./world_cities.json")
       macho.forEach((match) => {
         const li = document.createElement('li');
         li.textContent = match.name;
-        li.className="list-group-item"
+        li.className = "list-group-item"
 
         li.addEventListener("click", () => {
-          inputKey.value =match.name
+          inputKey.value = match.name
           list.innerHTML = ""
         });
         list.appendChild(li);
